@@ -1,5 +1,6 @@
 # Vekta
 ![Vekta AI](assets/logo.svg)
+
 > Lightweight AI inference gateway with SSE streaming, SQLite cache, and Ollama backend.
 
 ```
