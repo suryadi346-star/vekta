@@ -1,0 +1,11 @@
+# info.yml
+
+name: vekta
+author: suryadi
+path: suryadi346-star/vekta
+version: 1.0
+license: MIT
+description: vekta is a go project that allows you to interact with an AI chat and voice assistant..
+
+contact:
+  website: https://github.com/suryadi346-star/vekta

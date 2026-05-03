@@ -1,0 +1,18 @@
+{
+  "system": {
+    "gogc": 50,
+    "malloc_arena_max": 2,
+    "ollama_host": "127.0.0.1:11434",
+    "memory_hard_limit_mb": 3200
+  },
+  "cache": {
+    "sqlite_path": "./cache/chat.db",
+    "lru_max_items": 300,
+    "ttl_minutes": 45
+  },
+  "model": {
+    "default": "qwen2.5:0.5b",
+    "max_tokens": 2048,
+    "timeout_sec": 90
+  }
+}

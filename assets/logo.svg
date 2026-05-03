@@ -1,0 +1,81 @@
+<svg width="480" height="240" viewBox="0 0 680 340" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Vekta</title>
+<desc>Vekta logo — hexagon inference mark dengan wordmark</desc>
+
+<style>
+  .mark-ring  { stroke: #185FA5; }
+  .mark-hex   { stroke: #0C447C; fill: #EBF4FF; }
+  .mark-node  { fill: #0C447C; }
+  .mark-arrow { stroke: #185FA5; }
+  .word-v     { fill: #0C447C; }
+  .word-rest  { fill: #1A2B3C; }
+  .tagline    { fill: #6B8CA8; }
+  .mono-badge { fill: #E8F0F8; }
+  .mono-text  { fill: #0C447C; }
+
+  @media (prefers-color-scheme: dark) {
+    .mark-ring  { stroke: #4A90D9; }
+    .mark-hex   { stroke: #2B6CB0; fill: #0D2137; }
+    .mark-node  { fill: #4A90D9; }
+    .mark-arrow { stroke: #7EC8F5; }
+    .word-v     { fill: #4A90D9; }
+    .word-rest  { fill: #E8EEF4; }
+    .tagline    { fill: #6B8CA8; }
+    .mono-badge { fill: #1A3550; }
+    .mono-text  { fill: #4A90D9; }
+  }
+</style>
+
+<!-- outer ring -->
+<circle cx="220" cy="170" r="68"
+  class="mark-ring" fill="none" stroke-width="0.5" opacity="0.3"/>
+
+<!-- hexagon mark -->
+<polygon
+  points="220,112 264,136 264,204 220,228 176,204 176,136"
+  class="mark-hex" stroke-width="1.5"/>
+
+<!-- inner horizontal struts -->
+<line x1="176" y1="136" x2="264" y2="136"
+  class="mark-ring" stroke-width="0.4" opacity="0.4"/>
+<line x1="176" y1="204" x2="264" y2="204"
+  class="mark-ring" stroke-width="0.4" opacity="0.4"/>
+
+<!-- source node -->
+<circle cx="190" cy="170" r="5.5" class="mark-node"/>
+
+<!-- inference arrow -->
+<line x1="198" y1="170" x2="240" y2="170"
+  class="mark-arrow" stroke-width="2.5" stroke-linecap="round"/>
+<polyline points="232,163 241,170 232,177"
+  class="mark-arrow" fill="none"
+  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+<!-- destination node -->
+<circle cx="250" cy="170" r="4" class="mark-node" opacity="0.55"/>
+
+<!-- wordmark: V -->
+<text x="316" y="195"
+  font-family="system-ui,-apple-system,sans-serif"
+  font-size="72" font-weight="300" letter-spacing="-2"
+  class="word-v">V</text>
+
+<!-- wordmark: ekta -->
+<text x="361" y="195"
+  font-family="system-ui,-apple-system,sans-serif"
+  font-size="72" font-weight="300" letter-spacing="-2"
+  class="word-rest">ekta</text>
+
+<!-- tagline -->
+<text x="318" y="222"
+  font-family="system-ui,-apple-system,sans-serif"
+  font-size="13" font-weight="400" letter-spacing="3.5"
+  class="tagline">INFERENCE GATEWAY</text>
+
+<!-- mono badge -->
+<rect x="316" y="244" width="94" height="22" rx="4" class="mono-badge"/>
+<text x="363" y="259" text-anchor="middle"
+  font-family="ui-monospace,monospace"
+  font-size="11" font-weight="500" letter-spacing="1"
+  class="mono-text">vekta.run</text>
+</svg>
