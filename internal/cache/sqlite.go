@@ -14,12 +14,7 @@ type DB struct {
 }
 
 // NewSQLiteCache membuka koneksi SQLite dan mengkonfigurasi pool.
-// FIX #1: SetMaxOpenConns(1) — SQLite WAL mode paling stabil dengan
-// single writer. Multiple reader tetap bisa berjalan paralel via WAL.
-// FIX #2: SetMaxIdleConns(1) + ConnMaxLifetime mencegah koneksi stale
-// yang bisa menyebabkan lock phantom.
 func NewSQLiteCache(path string) (*DB, error) {
-	// DSN dengan pragma inline — lebih reliable daripada PRAGMA setelah open
 	dsn := fmt.Sprintf(
 		"%s?_journal_mode=WAL&_synchronous=NORMAL&_busy_timeout=5000&_cache_size=-8000&_foreign_keys=on",
 		path,
@@ -30,9 +25,8 @@ func NewSQLiteCache(path string) (*DB, error) {
 		return nil, fmt.Errorf("open sqlite: %w", err)
 	}
 
-	// FIX: Pool control — SQLite tidak butuh banyak koneksi.
-	// 1 writer, beberapa reader sudah cukup untuk beban ringan.
-	conn.SetMaxOpenConns(1)
+	// Pool control untuk SQLite
+	conn.SetMaxOpenConns(5)
 	conn.SetMaxIdleConns(1)
 	conn.SetConnMaxLifetime(30 * time.Minute)
 	conn.SetConnMaxIdleTime(5 * time.Minute)
@@ -53,8 +47,8 @@ func NewSQLiteCache(path string) (*DB, error) {
 func (db *DB) migrate() error {
 	_, err := db.conn.Exec(`
 		CREATE TABLE IF NOT EXISTS chat_cache (
-			key       TEXT PRIMARY KEY,
-			value     TEXT NOT NULL,
+			key        TEXT PRIMARY KEY,
+			value      TEXT NOT NULL,
 			expires_at INTEGER NOT NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_cache_expires ON chat_cache(expires_at);
@@ -72,12 +66,20 @@ func (db *DB) Get(key string) (string, bool) {
 	).Scan(&value, &expiresAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", false
+		}
 		return "", false
 	}
 
 	if time.Now().Unix() > expiresAt {
 		// Lazy delete — tidak block caller
-		go db.conn.Exec(`DELETE FROM chat_cache WHERE key = ?`, key)
+		go func(k string) {
+			_, err := db.conn.Exec(`DELETE FROM chat_cache WHERE key = ?`, k)
+			if err != nil {
+				// Optional: log error
+			}
+		}(key)
 		return "", false
 	}
 
@@ -86,6 +88,10 @@ func (db *DB) Get(key string) (string, bool) {
 
 // Set menyimpan nilai ke cache dengan TTL dalam menit.
 func (db *DB) Set(key, value string, ttlMinutes int) error {
+	if ttlMinutes <= 0 {
+		return fmt.Errorf("ttlMinutes harus positif")
+	}
+
 	expiresAt := time.Now().Add(time.Duration(ttlMinutes) * time.Minute).Unix()
 
 	_, err := db.conn.Exec(
@@ -108,5 +114,6 @@ func (db *DB) Evict() (int64, error) {
 
 // Close menutup koneksi dengan bersih.
 func (db *DB) Close() error {
+	time.Sleep(100 * time.Millisecond)
 	return db.conn.Close()
 }
