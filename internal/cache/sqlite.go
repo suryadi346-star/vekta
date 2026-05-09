@@ -32,7 +32,7 @@ func NewSQLiteCache(path string) (*DB, error) {
 
 	// FIX: Pool control — SQLite tidak butuh banyak koneksi.
 	// 1 writer, beberapa reader sudah cukup untuk beban ringan.
-	conn.SetMaxOpenConns(1)
+	conn.SetMaxOpenConns(5)
 	conn.SetMaxIdleConns(1)
 	conn.SetConnMaxLifetime(30 * time.Minute)
 	conn.SetConnMaxIdleTime(5 * time.Minute)
@@ -67,17 +67,31 @@ func (db *DB) Get(key string) (string, bool) {
 	var value string
 	var expiresAt int64
 
+	func (db *DB) Get(key string) (string, bool) {
+	var value string
+	var expiresAt int64
+
 	err := db.conn.QueryRow(
 		`SELECT value, expires_at FROM chat_cache WHERE key = ?`, key,
 	).Scan(&value, &expiresAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", false
+		}
+		// Log error jika ada masalah lain
 		return "", false
 	}
+	// ... rest of code
+}
 
 	if time.Now().Unix() > expiresAt {
 		// Lazy delete — tidak block caller
-		go db.conn.Exec(`DELETE FROM chat_cache WHERE key = ?`, key)
+		go func() {
+    if err := db.conn.Exec(`DELETE FROM chat_cache WHERE key = ?`, key).Err(); err != nil {
+        // Log error atau handle sesuai kebutuhan
+    }
+}()
 		return "", false
 	}
 
@@ -86,7 +100,11 @@ func (db *DB) Get(key string) (string, bool) {
 
 // Set menyimpan nilai ke cache dengan TTL dalam menit.
 func (db *DB) Set(key, value string, ttlMinutes int) error {
-	expiresAt := time.Now().Add(time.Duration(ttlMinutes) * time.Minute).Unix()
+	if ttlMinutes <= 0 {
+		return fmt.Errorf("ttlMinutes harus positif")
+	}
+	// ... rest of code
+}
 
 	_, err := db.conn.Exec(
 		`INSERT OR REPLACE INTO chat_cache (key, value, expires_at) VALUES (?, ?, ?)`,
@@ -108,5 +126,7 @@ func (db *DB) Evict() (int64, error) {
 
 // Close menutup koneksi dengan bersih.
 func (db *DB) Close() error {
+	// Give pending goroutines time to finish
+	time.Sleep(100 * time.Millisecond)
 	return db.conn.Close()
 }
