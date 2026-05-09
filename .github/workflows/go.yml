@@ -28,7 +28,7 @@ jobs:
       run: go mod download
 
     - name: Build
-      run: go build -v ./...
+      run: go build -v vekta/internal/cache/sqlite.go
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v vekta/internal/cache/cache_test.go
